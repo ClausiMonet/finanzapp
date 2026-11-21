@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Finanzapp – Anleitung</title>
+<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:0 auto;padding:16px;line-height:1.55;color:#0f172a}h1{font-size:24px}h2{margin-top:28px;font-size:19px;border-bottom:1px solid #e2e8f0;padding-bottom:4px}table{border-collapse:collapse;width:100%;font-size:14px;display:block;overflow-x:auto}td,th{border:1px solid #e2e8f0;padding:6px 8px;text-align:left}code{background:#eef1f6;padding:1px 5px;border-radius:4px}li{margin:4px 0}</style></head><body><h1>Finanzapp – Einrichtung Schritt für Schritt</h1>
+<p>Einmalig etwa 30–40 Minuten. Danach läuft alles offline, nur für den Kursabruf geht kurz eine Anfrage raus. Diese Anfrage enthält <strong>nur Tickersymbole</strong>, nie Beträge.</p>
+<p><strong>Wichtig:</strong> Die App hat <strong>keine Passwort-Wiederherstellung</strong>. Vergisst du dein Passwort, sind die Daten weg. Mach regelmäßig ein Backup (siehe Schritt 6).</p>
+<hr />
+<h2>Was liegt wo?</h2>
+<table>
+<thead>
+<tr>
+<th>Was</th>
+<th>Wo</th>
+<th>Wer kann es sehen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Programmcode der App</td>
+<td>GitHub Pages (öffentlich)</td>
+<td>Jeder, aber da stehen keine Daten drin</td>
+</tr>
+<tr>
+<td>Deine Finanzdaten</td>
+<td>Nur auf deinem Gerät, AES-256-verschlüsselt</td>
+<td>Nur du (mit Passwort)</td>
+</tr>
+<tr>
+<td>Kurs-Proxy</td>
+<td>Dein Cloudflare-Konto</td>
+<td>Sieht nur Symbole wie <code>EUNL.DE</code></td>
+</tr>
+<tr>
+<td>Backup-Datei</td>
+<td>Wo du sie hinlegst</td>
+<td>Ohne Passwort unlesbar</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Schritt 1: App auf GitHub Pages veröffentlichen</h2>
+<ol>
+<li>Auf <strong>https://github.com/signup</strong> ein kostenloses Konto anlegen (z. B. Benutzername <code>maxmuster</code>).</li>
+<li>Oben rechts auf <strong>+ → New repository</strong> gehen.</li>
+<li>Repository name: <code>finanzapp</code></li>
+<li><strong>Public</strong> auswählen (für kostenlose GitHub Pages nötig, es liegt ja nur Code darin)</li>
+<li>Auf <strong>Create repository</strong> klicken</li>
+<li>Auf der neuen Seite den Link <strong>„uploading an existing file“</strong> anklicken.</li>
+<li>Den <strong>Inhalt</strong> des Ordners <code>finanzapp</code> hineinziehen, also <code>index.html</code>, <code>sw.js</code>, <code>manifest.webmanifest</code> und die Ordner <code>css</code>, <code>js</code>, <code>icons</code>. Den Ordner <code>cloudflare-worker</code> brauchst du dort nicht.
+   <em>Tipp: Am Laptop geht das per Drag &amp; Drop am einfachsten. Die Ordnerstruktur muss erhalten bleiben.</em></li>
+<li>Unten auf <strong>Commit changes</strong> klicken.</li>
+<li>Im Repository <strong>Settings → Pages</strong> öffnen:</li>
+<li>Source: <strong>Deploy from a branch</strong></li>
+<li>Branch: <strong>main</strong>, Ordner <strong>/ (root)</strong>, dann <strong>Save</strong></li>
+<li>Nach 1–2 Minuten steht oben die Adresse, z. B. <code>https://maxmuster.github.io/finanzapp/</code></li>
+</ol>
+<h2>Schritt 2: Kurs-Proxy bei Cloudflare einrichten</h2>
+<ol>
+<li>Auf <strong>https://dash.cloudflare.com/sign-up</strong> kostenlos registrieren. Eine eigene Domain brauchst du nicht.</li>
+<li>Links <strong>Compute (Workers) → Workers &amp; Pages</strong> öffnen und auf <strong>Create</strong> klicken. Dann <strong>Start with Hello World</strong> (bzw. „Create Worker“) wählen.</li>
+<li>Name: z. B. <code>kurse</code>, dann <strong>Deploy</strong></li>
+<li>Auf <strong>Edit code</strong> klicken, den gesamten Beispielcode löschen und den Inhalt von <code>cloudflare-worker/worker.js</code> einfügen. Danach <strong>Deploy</strong> klicken.</li>
+<li>Ein geheimes Token festlegen, also ein langes Zufallspasswort, z. B. aus dem Passwortmanager mit 30+ Zeichen:</li>
+<li>Den Worker öffnen, dann <strong>Settings → Variables and Secrets → Add</strong></li>
+<li>Type: <strong>Secret</strong>, Name: <code>TOKEN</code>, Value: dein Token, dann <strong>Deploy</strong></li>
+<li>Die Worker-Adresse notieren, z. B. <code>https://kurse.maxmuster.workers.dev</code>
+   <em>Test: Rufst du die Adresse im Browser auf, muss „Nicht autorisiert“ erscheinen. Genau richtig, ohne Token kommt niemand rein.</em></li>
+</ol>
+<p>Der kostenlose Plan erlaubt 100.000 Anfragen pro Tag. Du brauchst ein paar Dutzend.</p>
+<h2>Schritt 3: App installieren</h2>
+<p><strong>Android (Chrome):</strong>
+1. Die GitHub-Pages-Adresse öffnen.
+2. Menü <strong>⋮ → „App installieren“</strong> bzw. <strong>„Zum Startbildschirm hinzufügen“</strong> wählen.
+3. Die App liegt jetzt als Icon auf dem Homescreen und startet auch ohne Internet.</p>
+<p><strong>Laptop (Chrome oder Edge):</strong>
+1. Die gleiche Adresse öffnen.
+2. Rechts in der Adressleiste auf das <strong>Installieren-Symbol</strong> (Monitor mit Pfeil) klicken.</p>
+<h2>Schritt 4: Erster Start</h2>
+<ol>
+<li>Ein <strong>Passwort</strong> festlegen (mind. 8 Zeichen) und gut merken.</li>
+<li>Unter <strong>Einstellungen → Kurs-Proxy</strong> die Worker-Adresse und das Token eintragen, dann <strong>Verbindung testen</strong>. Es sollten Bitcoin- und MSCI-World-Kurse erscheinen.</li>
+<li>Unter <strong>Vermögen → + Konto</strong> deine Konten anlegen:</li>
+<li>Girokonten (Sparkasse, Volksbank, DKB …) als <strong>Girokonto</strong></li>
+<li>Tagesgeld (ING …) als <strong>Tagesgeld</strong></li>
+<li>Trade Republic, Scalable als <strong>Depot</strong></li>
+<li>Bitvavo als <strong>Krypto</strong></li>
+</ol>
+<h2>Schritt 5: Daten importieren</h2>
+<p><strong>Kontoumsätze:</strong> Im Online-Banking (am besten am Laptop) die Umsätze der letzten 6–12 Monate als <strong>CSV</strong> exportieren. In der App dann <strong>Umsätze → CSV importieren</strong>. Die Menünamen können je nach Bank etwas abweichen:</p>
+<table>
+<thead>
+<tr>
+<th>Bank</th>
+<th>Wo ungefähr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sparkasse</td>
+<td>Umsätze → Export → <strong>CSV-CAMT V2</strong></td>
+</tr>
+<tr>
+<td>Volksbank/Raiffeisenbank</td>
+<td>Umsätze → Exportieren → CSV</td>
+</tr>
+<tr>
+<td>ING</td>
+<td>Umsätze → Export / Download → CSV</td>
+</tr>
+<tr>
+<td>DKB</td>
+<td>Umsätze → Download-Symbol → CSV</td>
+</tr>
+<tr>
+<td>comdirect</td>
+<td>Umsätze → Export → CSV</td>
+</tr>
+</tbody>
+</table>
+<p>Die App erkennt das Format automatisch. Doppelte Buchungen werden beim erneuten Import übersprungen, du kannst also einfach jeden Monat den letzten Zeitraum importieren. Nach dem ersten Import fragt die App nach dem <strong>aktuellen Kontostand</strong>, damit dein Vermögen stimmt.</p>
+<p><strong>Depot &amp; Krypto:</strong>
+- <strong>Scalable Capital:</strong> Transaktionen als CSV exportieren, dann <strong>Vermögen → Broker-CSV</strong>
+- <strong>Bitvavo:</strong> Transaktionshistorie als CSV exportieren, dann <strong>Vermögen → Broker-CSV</strong>
+- <strong>Trade Republic:</strong> Falls deine App einen CSV-Export anbietet, geht er über Broker-CSV mit Spaltenzuordnung. Sonst trägst du die Positionen über <strong>+ Position</strong> ein (ISIN suchen, Stückzahl und Ø-Kaufkurs eintragen). Bei Sparplänen passt du ab und zu die Stückzahl an.</p>
+<p>Kurs-Symbole: Bei ETFs/Aktien sucht die App per ISIN automatisch das Xetra-Symbol (Endung <code>.DE</code>), Krypto bekommt z. B. <code>BTC-EUR</code>. Über <strong>Kurse</strong> aktualisierst du die Kurse, beim App-Start passiert das automatisch, wenn die letzten Kurse älter als 6 Stunden sind.</p>
+<h2>Schritt 6: Laptop ↔ Handy abgleichen</h2>
+<p>Es gibt bewusst keine Cloud. So überträgst du deinen Stand:
+1. Auf dem Gerät mit dem aktuellen Stand: <strong>Einstellungen → Backup exportieren</strong>. Es entsteht eine <code>.finanzapp</code>-Datei.
+2. Die Datei aufs andere Gerät bringen, z. B. per USB, Quick Share oder Mail an dich selbst. Ohne Passwort ist sie unlesbar.
+3. Auf dem anderen Gerät: <strong>Einstellungen → Backup importieren</strong>. Der Stand dort wird <strong>ersetzt</strong>.</p>
+<p>Am besten machst du die großen Arbeiten (CSV-Import) am Laptop und schiebst dann das Backup aufs Handy. Bewahre zusätzlich ein Backup an einem sicheren Ort auf (z. B. USB-Stick).</p>
+<h2>Schritt 7: Automatischer Abgleich (statt Backup hin und her)</h2>
+<p>Einmalig in Cloudflare, ca. 3 Minuten:
+1. Im Cloudflare-Dashboard <strong>Storage &amp; Databases → Workers KV</strong> öffnen (bzw. „KV“), dann <strong>Create</strong> (Name z. B. <code>finanzapp-sync</code>).
+2. Deinen Worker <code>kurse</code> öffnen, dann <strong>Settings → Bindings → Add → KV Namespace</strong>:
+   - Variable name: <strong><code>SYNC</code></strong> (genau so geschrieben)
+   - KV namespace: <code>finanzapp-sync</code>, dann <strong>Deploy</strong>
+3. Den neuen Code aus <code>cloudflare-worker/worker.js</code> wie in Schritt 2 im Worker einfügen und <strong>Deploy</strong> klicken.</p>
+<p>In der App:
+1. <strong>Auf dem Laptop:</strong> Einstellungen → <strong>Sync starten (erstes Gerät)</strong>, danach <strong>Kopplungscode anzeigen</strong> und kopieren.
+2. <strong>Auf dem Handy</strong> (App installiert, eigenes Passwort gesetzt): Einstellungen → <strong>Mit anderem Gerät koppeln</strong> und den Code einfügen.</p>
+<p>Ab dann gleichen sich beide Geräte beim Öffnen, Schließen und nach Änderungen automatisch ab. Cloudflare speichert nur verschlüsselten Datensalat. Der Schlüssel steckt im Kopplungscode, <strong>behandle ihn wie ein Passwort</strong>. Belege (Fotos/PDFs) werden nicht abgeglichen, die überträgst du weiter per Backup. Änderst du auf beiden Geräten gleichzeitig etwas, werden die Stände zusammengeführt.</p>
+<h2>Schritt 8: Fingerabdruck einrichten (Android)</h2>
+<p>Voraussetzungen: Die App ist über die GitHub-Adresse installiert und am Handy ist eine Displaysperre mit Fingerabdruck eingerichtet.
+1. Einstellungen → <strong>Fingerabdruck → Einrichten</strong>
+2. Das App-Passwort einmal bestätigen
+3. Android fragt, ob ein <strong>Passkey</strong> gespeichert werden soll. Mit <strong>Ja</strong> bestätigen (Google-Passwortmanager).</p>
+<p>Danach erscheint auf dem Sperrbildschirm <strong>„Mit Fingerabdruck entsperren“</strong>. Nach einer Passwortänderung musst du den Fingerabdruck neu einrichten. Falls dein Gerät die nötige Passkey-Funktion nicht unterstützt, zeigt die App das an. Dann geht es weiter mit Passwort.</p>
+<h2>Funktionen im Überblick</h2>
+<ul>
+<li><strong>Übersicht:</strong> Hinweise (Budget, Preiserhöhung, Kündigungsfrist, Monatsende knapp …), Nettovermögen mit Verlauf, Monatsprognose, Ausgaben-Kreisdiagramm, Budgets, fällige Verträge</li>
+<li><strong>Umsätze:</strong> Filter nach Monat, Konto und Kategorie, dazu Volltextsuche (auch <code>#tag</code>, <code>#steuer</code>, <code>#beleg</code>). In jeder Buchung kannst du:</li>
+<li>auf mehrere Kategorien <strong>aufteilen</strong> (✂)</li>
+<li><strong>Tags</strong> vergeben</li>
+<li>als <strong>steuerlich relevant</strong> markieren (§)</li>
+<li><strong>Belege</strong> als Foto/PDF anhängen (📎, verschlüsselt)</li>
+<li>mit jemandem <strong>teilen</strong> (👥)</li>
+<li><strong>PayPal-Abgleich:</strong> Die PayPal-Aktivitäten-CSV über „CSV importieren“ wählen. „PayPal“-Abbuchungen bekommen dann den echten Händler. Steht im Verwendungszweck „Ihr Einkauf bei …“, klappt das sogar ohne PayPal-Datei.</li>
+<li><strong>Vermögen:</strong></li>
+<li>Konten, Depot und Krypto mit Gewinn/Verlust</li>
+<li><strong>Depot-Verlauf</strong> im Vergleich zum MSCI World (gleiche Einzahlungen)</li>
+<li><strong>Rebalancing</strong> mit Kaufvorschlag</li>
+<li><strong>Dividenden &amp; Ausschüttungen</strong></li>
+<li><strong>Verträge:</strong></li>
+<li>automatische Erkennung, Preiserhöhungs-Warnung, Kündigungsschreiben</li>
+<li>Trag <strong>Vertragsende und Kündigungsfrist</strong> ein, dann erinnert dich die App 30 Tage vor Fristende.</li>
+<li><strong>Planen:</strong></li>
+<li>Budgets und Sparziele</li>
+<li><strong>Prognose fürs Monatsende</strong></li>
+<li><strong>Notgroschen-Check</strong></li>
+<li><strong>Vermögensprognose</strong> mit Zinseszins, Inflation und „finanzieller Freiheit“</li>
+<li><strong>Mehr</strong> (Raster-Symbol oben):</li>
+<li><strong>Auswertung</strong>, inkl. Tags</li>
+<li><strong>Monatsrückblick</strong></li>
+<li><strong>Ausgaben teilen</strong> (wer schuldet wem)</li>
+<li><strong>Steuer &amp; Belege</strong>: absetzbare Ausgaben als CSV, Kapitalerträge je Bank gegen deine Freistellungsaufträge. Den Freistellungsauftrag trägst du beim jeweiligen Konto ein.</li>
+<li><strong>Benachrichtigungen:</strong> Wichtige Hinweise erscheinen als Handy-Benachrichtigung, wenn du die App öffnest. Bei geschlossener App ist das ohne eigenen Server nicht möglich.</li>
+<li><strong>Diskret-Modus (Auge oben rechts):</strong> blendet alle Beträge aus. Konten, ETFs und Kategorien bleiben sichtbar, Anteile, Fortschritt und Rendite stehen in Prozent da.</li>
+<li><strong>Sicherheit:</strong> AES-256-GCM-Verschlüsselung, Fingerabdruck, automatische Sperre bei Inaktivität</li>
+</ul>
+<h2>App aktualisieren</h2>
+<p>Bekommst du neue Dateien, lädst du <strong>den kompletten Inhalt</strong> des Ordners im GitHub-Repository wieder hoch (<strong>Add file → Upload files</strong>, gleiche Namen überschreiben, neue Dateien kommen dazu). Auch <code>worker.js</code> im Cloudflare-Worker aktualisieren. Die App holt sich die neue Version beim nächsten Start mit Internet. <strong>Deine Daten bleiben dabei erhalten</strong>, sie liegen ja auf dem Gerät und nicht bei GitHub.</p>
+<h2>Häufige Fragen</h2>
+<ul>
+<li><strong>„Kein Kurs“ bei einer Position:</strong> Position antippen und über die Suche (ISIN oder Name) das richtige Symbol wählen. Bei US-Werten geht z. B. <code>AAPL</code> (wird automatisch in € umgerechnet) oder das Xetra-Symbol.</li>
+<li><strong>Import erkennt Spalten falsch:</strong> Im Importdialog unter „Spaltenzuordnung anpassen“ die richtigen Spalten wählen.</li>
+<li><strong>Falsch erkannter Vertrag:</strong> Vertrag öffnen, dann <strong>„Kein Vertrag – ignorieren“</strong>.</li>
+<li><strong>Kontostand stimmt nicht:</strong> Konto antippen und den echten Kontostand eintragen.</li>
+<li><strong>Sync meldet „KV-Speicher nicht verknüpft“:</strong> Schritt 7 prüfen, die Variable muss genau <code>SYNC</code> heißen.</li>
+<li><strong>Browser-Daten gelöscht / Handy neu:</strong> Die App neu installieren und auf dem Sperrbildschirm <strong>„Backup-Datei wiederherstellen“</strong> wählen.</li>
+</ul></body></html>
